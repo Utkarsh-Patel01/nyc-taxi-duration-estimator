@@ -114,7 +114,7 @@ the dataset's 6-month window — see `notebooks/02_model_experiments.ipynb`).
 ### Final model: Tuned LightGBM (standalone)
 
 Stacking edged out standalone LightGBM on RMSLE (0.3634 vs 0.3644, a 0.27%
-relative improvement) but was *worse* on MAE — a mixed, marginal result. Against
+relative improvement) but was *worse* on MAE a mixed, marginal result. Against
 that tiny gain:
 
 | | Tuned LightGBM | Stacking ensemble |
@@ -125,22 +125,22 @@ that tiny gain:
 Random Forest alone accounted for 99% of the stacking bundle's size and 58% of
 its latency, despite being the weakest of the three base models on every
 accuracy metric. For a rider-facing ETA feature, a sub-millisecond response at
-effectively equivalent accuracy is the better production tradeoff — so the
+effectively equivalent accuracy is the better production tradeoff so the
 project ships standalone tuned LightGBM, not the ensemble.
 
 ## Limitations
 
-- No lower-bound speed filter was applied — trips with near-zero distance but
+- No lower-bound speed filter was applied trips with near-zero distance but
   non-trivial duration (a deliberate, discussed tradeoff to avoid also
   filtering out genuine gridlock-traffic trips) remain in the training data.
 - Prediction error grows with trip length in absolute terms (from ~120s MAE on
-  5-10 minute trips to ~870s on 40+ minute trips) — RMSLE was chosen as the
+  5-10 minute trips to ~870s on 40+ minute trips) RMSLE was chosen as the
   primary metric specifically because it's relative, not absolute, but very
   long trips remain the hardest case for this model.
 - Straight-line (Haversine) distance is used as a proxy for actual driven
-  distance — no road-network routing is used, which likely under-represents
+  distance no road-network routing is used, which likely under-represents
   trips that require significant detours (bridges, one-way systems, etc).
-- Trained on 6 months of 2016 data — no evaluation of how the model performs
+- Trained on 6 months of 2016 data no evaluation of how the model performs
   on more recent traffic patterns, road layouts, or trip-time distributions.
 
 ## Future Improvements
