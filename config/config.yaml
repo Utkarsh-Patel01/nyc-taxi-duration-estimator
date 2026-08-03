@@ -1,0 +1,20 @@
+random_seed: 42
+paths:
+  raw_data: "data/raw/train.csv"
+  processed_data: "data/processed/train_features.parquet"
+  model_dir: "models/"
+  final_model: "models/lightgbm_final.joblib"
+
+feature_engineering:
+  coordinate_bounds:
+    min_lon: -74.03
+    max_lon: -73.75
+    min_lat: 40.63
+    max_lat: 40.85
+  passenger_bounds:
+    min_count: 1
+    max_count: 6
+  duration_bounds:
+    min_seconds: 60
+    max_seconds: 79200
+  max_speed_kmh: 100.0
