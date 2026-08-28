@@ -1,9 +1,3 @@
-"""Data loading utilities for the NYC Taxi Trip Duration project.
-
-Centralizes dtype and parsing decisions so every script/notebook
-that loads the raw data gets identical, memory-efficient columns.
-"""
-
 import logging
 from pathlib import Path
 
@@ -11,8 +5,6 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-# Explicit dtypes: reduces memory footprint vs. pandas' default inference,
-# and documents the expected schema in one place.
 RAW_DTYPES = {
     "id": "object",
     "vendor_id": "int8",
@@ -25,26 +17,14 @@ RAW_DTYPES = {
     "trip_duration": "int32",
 }
 
-# Parsed separately as datetimes, not included in RAW_DTYPES
+
 DATETIME_COLS = ["pickup_datetime", "dropoff_datetime"]
 
-# This column is derivable directly from pickup_datetime + trip_duration.
-# It must NEVER be used as a model feature — flagged here so every
-# downstream consumer of this module is reminded.
 LEAKAGE_COLUMNS = ["dropoff_datetime"]
 
 
 def load_raw_data(path: str | Path, nrows: int | None = None) -> pd.DataFrame:
-    """Load the raw NYC taxi trip CSV with explicit dtypes.
 
-    Args:
-        path: Path to train.csv.
-        nrows: Optional row limit, useful for fast local development
-            (e.g. nrows=50_000) before running on the full dataset.
-
-    Returns:
-        DataFrame with enforced dtypes and parsed datetime columns.
-    """
     path = Path(path)
     if not path.exists():
         raise FileNotFoundError(f"Raw data not found at {path}")
@@ -63,7 +43,6 @@ def load_raw_data(path: str | Path, nrows: int | None = None) -> pd.DataFrame:
 
 
 def inspect_schema(df: pd.DataFrame) -> pd.DataFrame:
-    """Return a summary of column dtypes and non-null counts."""
     summary = pd.DataFrame({
         "dtype": df.dtypes,
         "non_null_count": df.notna().sum(),
@@ -73,7 +52,6 @@ def inspect_schema(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def missing_value_report(df: pd.DataFrame) -> pd.DataFrame:
-    """Return missing-value counts and percentages per column."""
     missing = df.isna().sum()
     pct = (missing / len(df)) * 100
     report = pd.DataFrame({"missing_count": missing, "missing_pct": pct.round(3)})
@@ -83,14 +61,6 @@ def missing_value_report(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def validate_raw_data(df: pd.DataFrame) -> list[str]:
-    """Run basic sanity checks on the raw dataset.
-
-    This is NOT outlier handling (that's Phase 3) — just structural
-    checks that would indicate a corrupted download or schema mismatch.
-
-    Returns:
-        A list of human-readable warning strings (empty if all checks pass).
-    """
     warnings = []
 
     expected_cols = set(RAW_DTYPES) | set(DATETIME_COLS)
