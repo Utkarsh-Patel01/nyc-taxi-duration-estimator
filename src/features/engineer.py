@@ -1,13 +1,5 @@
-"""Feature engineering for the NYC Taxi Trip Duration project.
-
-This module is the single source of truth for transformations used during
-training and inference. Keep feature logic here; do not duplicate it in the
-notebooks or Streamlit application.
-"""
-
 import logging
 from pathlib import Path
-
 import numpy as np
 import pandas as pd
 
@@ -22,7 +14,6 @@ def haversine_distance_km(
     lat2: np.ndarray,
     lon2: np.ndarray,
 ) -> np.ndarray:
-    """Return vectorized great-circle distances in kilometres."""
     lat1_rad, lon1_rad, lat2_rad, lon2_rad = map(
         np.radians, (lat1, lon1, lat2, lon2)
     )
@@ -36,7 +27,6 @@ def haversine_distance_km(
 
 
 def add_distance_feature(df: pd.DataFrame) -> pd.DataFrame:
-    """Add a ``distance_km`` column in place and return ``df``."""
     df["distance_km"] = haversine_distance_km(
         df["pickup_latitude"].to_numpy(),
         df["pickup_longitude"].to_numpy(),
@@ -47,7 +37,6 @@ def add_distance_feature(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def add_time_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Add pickup-hour, day-of-week, and weekend indicator features."""
     if not pd.api.types.is_datetime64_any_dtype(df["pickup_datetime"]):
         raise TypeError("pickup_datetime must be datetime-like before engineering features")
 
@@ -64,7 +53,6 @@ def valid_coordinate_mask(
     min_lat: float = 40.63,
     max_lat: float = 40.85,
 ) -> pd.Series:
-    """Return True where pickup and dropoff coordinates lie in the NYC box."""
     pickup_ok = df["pickup_longitude"].between(min_lon, max_lon) & df[
         "pickup_latitude"
     ].between(min_lat, max_lat)
@@ -77,19 +65,16 @@ def valid_coordinate_mask(
 def valid_passenger_count_mask(
     df: pd.DataFrame, min_count: int = 1, max_count: int = 6
 ) -> pd.Series:
-    """Return True for realistic taxi passenger counts."""
     return df["passenger_count"].between(min_count, max_count)
 
 
 def valid_trip_duration_mask(
     df: pd.DataFrame, min_seconds: int = 60, max_seconds: int = 79_200
 ) -> pd.Series:
-    """Return True for trips within the absolute duration bounds."""
     return df["trip_duration"].between(min_seconds, max_seconds)
 
 
 def valid_speed_mask(df: pd.DataFrame, max_kmh: float = 100.0) -> pd.Series:
-    """Return True when the trip's implied average speed is plausible."""
     hours = df["trip_duration"] / 3600.0
     implied_speed = df["distance_km"] / hours.replace(0, np.nan)
     return implied_speed.le(max_kmh) & implied_speed.notna()
@@ -104,11 +89,6 @@ def clean_and_engineer_features(
     duration_bounds: dict | None = None,
     max_speed_kmh: float = 100.0,
 ) -> pd.DataFrame:
-    """Clean raw records and add consistent model features.
-
-    The caller's dataframe is not mutated. Each filter is logged separately
-    so the loss of records is visible and reviewable.
-    """
     coord_bounds = coord_bounds or {}
     passenger_bounds = passenger_bounds or {}
     duration_bounds = duration_bounds or {}
@@ -130,7 +110,6 @@ def clean_and_engineer_features(
 
     out = out.reset_index(drop=True)
     logger.info(
-        "Cleaning complete: %d -> %d rows (%.2f%% removed)",
         n_start,
         len(out),
         100 * (n_start - len(out)) / n_start if n_start else 0.0,
