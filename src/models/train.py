@@ -1,12 +1,5 @@
-"""Training utilities for the NYC Taxi Trip Duration project.
-
-This module defines the canonical model inputs and the reproducible
-train/validation split used by every experiment.
-"""
-
 import logging
 import time
-
 import numpy as np
 import pandas as pd
 from lightgbm import LGBMRegressor, early_stopping, log_evaluation
@@ -37,7 +30,6 @@ TARGET_COLUMN = "trip_duration"
 
 
 def get_features_and_target(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
-    """Return canonical model features ``X`` and target ``y`` from processed data."""
     required_columns = set(FEATURE_COLUMNS) | {TARGET_COLUMN}
     missing = required_columns - set(df.columns)
     if missing:
@@ -49,11 +41,7 @@ def get_features_and_target(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
 def make_train_val_split(
     X: pd.DataFrame, y: pd.Series, val_size: float = 0.2
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
-    """Create a reproducible random train/validation split.
-
-    A random split is appropriate for this fixed six-month competition dataset:
-    its trip-level features describe a journey rather than a long-running trend.
-    """
+ 
     if not 0 < val_size < 1:
         raise ValueError("val_size must be greater than 0 and less than 1")
     if len(X) != len(y):
@@ -79,11 +67,7 @@ def train_random_forest(
     min_samples_leaf: int = 5,
     n_jobs: int = -1,
 ) -> tuple[RandomForestRegressor, float]:
-    """Fit a modest, regularized Random Forest and return it with fit time.
 
-    Capping tree depth and requiring multiple observations per leaf prevents
-    individual trees from memorizing GPS-coordinate noise in this large dataset.
-    """
     if n_estimators < 1:
         raise ValueError("n_estimators must be at least 1")
     if max_depth < 1:
@@ -118,11 +102,7 @@ def train_xgboost(
     colsample_bytree: float = 0.8,
     early_stopping_rounds: int = 20,
 ) -> tuple[XGBRegressor, float]:
-    """Fit XGBoost with validation-based early stopping.
 
-    The validation set determines when to stop adding trees; only the
-    training split is used to fit the trees themselves.
-    """
     if n_estimators < 1:
         raise ValueError("n_estimators must be at least 1")
     if learning_rate <= 0:
@@ -169,11 +149,7 @@ def train_lightgbm(
     colsample_bytree: float = 0.8,
     early_stopping_rounds: int = 20,
 ) -> tuple[LGBMRegressor, float]:
-    """Fit LightGBM with validation-based early stopping.
 
-    ``num_leaves`` constrains LightGBM's leaf-wise trees, helping prevent
-    overfitting while retaining its efficient large-tabular-data training.
-    """
     if n_estimators < 1:
         raise ValueError("n_estimators must be at least 1")
     if learning_rate <= 0:
@@ -223,11 +199,7 @@ def generate_oof_predictions(
     n_splits: int = 5,
     **train_fn_kwargs,
 ) -> np.ndarray:
-    """Generate leakage-safe out-of-fold predictions for one base model.
 
-    Each row is predicted by a fresh model that was trained without that row.
-    These predictions can therefore be used safely as meta-model features.
-    """
     if n_splits < 2:
         raise ValueError("n_splits must be at least 2")
     if len(X) != len(y):
