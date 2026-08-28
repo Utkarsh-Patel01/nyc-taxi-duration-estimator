@@ -1,13 +1,6 @@
-"""Streamlit ETA estimator for the NYC Taxi Trip Duration project.
-
-This module contains only UI logic. Validation, feature engineering,
-prediction, and output formatting remain in ``src.inference.predict``.
-"""
-
 import sys
 from datetime import date, datetime, time as dtime
 from pathlib import Path
-
 import streamlit as st
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -21,7 +14,6 @@ MODEL_PATH = PROJECT_ROOT / "models" / "lightgbm_final.joblib"
 
 @st.cache_resource
 def get_model():
-    """Load the immutable model artifact once and reuse it across reruns."""
     return load_model(MODEL_PATH)
 
 
