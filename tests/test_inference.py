@@ -1,7 +1,4 @@
-"""Tests for the prediction pipeline used by the Streamlit application."""
-
 from pathlib import Path
-
 import pandas as pd
 import pytest
 
