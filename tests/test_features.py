@@ -1,8 +1,5 @@
-"""Tests for the shared feature-engineering module."""
-
 import pandas as pd
 import pytest
-
 from src.features.engineer import (
     add_distance_feature,
     add_time_features,
@@ -16,7 +13,6 @@ from src.features.engineer import (
 
 class TestHaversineDistance:
     def test_known_nyc_distance(self):
-        """Times Square to the Empire State Building is about one kilometre."""
         distance = haversine_distance_km(40.7580, -73.9855, 40.7484, -73.9857)
         assert 0.9 < distance < 1.2
 
